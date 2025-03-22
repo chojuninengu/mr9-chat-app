@@ -1,56 +1,79 @@
 use axum::{
-    routing::{get, post},
-    http::StatusCode,
+    extract::{Extension, Json, WebSocketUpgrade, ws::{Message, WebSocket}},
+    routing::{post, get},
     response::IntoResponse,
-    Json, Router,
+    Router,
 };
 use serde::{Deserialize, Serialize};
-use std::sync::{Arc, Mutex};
+use std::{sync::Arc};
+use tokio::sync::{Mutex, broadcast};
 use tokio::net::TcpListener;
-use tower_http::cors::{Any, CorsLayer};
+use tower_http::cors::{CorsLayer, Any};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-struct Message {
+#[derive(Debug, Serialize, Deserialize, Clone)]
+struct ChatMessage {
+    username: String,
     content: String,
 }
 
-// Shared state for messages
-struct AppState {
-    messages: Mutex<Vec<Message>>,
-}
+type SharedMessages = Arc<Mutex<Vec<ChatMessage>>>;
 
 #[tokio::main]
 async fn main() {
-    let shared_state = Arc::new(AppState {
-        messages: Mutex::new(vec![
-            Message { content: "Hello from Rust!".to_string() },
-            Message { content: "This is a test message.".to_string() },
-            Message { content: "Chat is working!".to_string() },
-        ]),
-    });
+    let messages: SharedMessages = Arc::new(Mutex::new(Vec::new()));
+    let (tx, _rx) = broadcast::channel::<ChatMessage>(100);
 
     let app = Router::new()
-        .route("/messages", get(get_messages).post(post_message))
-        .layer(CorsLayer::permissive())
-        .with_state(shared_state);
+        .route("/send", post(send_message))
+        .route("/messages", get(get_messages))
+        .route("/ws", get(websocket_handler))
+        .layer(CorsLayer::new().allow_origin(Any))
+        .layer(Extension(messages))
+        .layer(Extension(tx.clone()));
 
-    let listener = TcpListener::bind("0.0.0.0:8000").await.unwrap();
-    println!("🚀 Server running on http://localhost:8000");
+    let addr = "127.0.0.1:3000";
+    let listener = TcpListener::bind(addr).await.unwrap();
+    println!("🚀 Server running on http://{}", addr);
     axum::serve(listener, app).await.unwrap();
 }
 
-// Get all messages
-async fn get_messages(state: axum::extract::State<Arc<AppState>>) -> impl IntoResponse {
-    let messages = state.messages.lock().unwrap();
-    Json(messages.clone())
+// 📨 POST /send - Send a new message
+async fn send_message(
+    Extension(messages): Extension<SharedMessages>,
+    Extension(tx): Extension<broadcast::Sender<ChatMessage>>,
+    Json(msg): Json<ChatMessage>,
+) -> Json<Vec<ChatMessage>> {
+    let mut stored_messages = messages.lock().await;
+    stored_messages.push(msg.clone());
+    let _ = tx.send(msg.clone());  // Broadcast to WebSocket clients
+    Json(stored_messages.clone())
 }
 
-// Post a new message
-async fn post_message(
-    state: axum::extract::State<Arc<AppState>>,
-    Json(new_message): Json<Message>,
+// 📩 GET /messages - Get all messages
+async fn get_messages(Extension(messages): Extension<SharedMessages>) -> Json<Vec<ChatMessage>> {
+    let stored_messages = messages.lock().await;
+    Json(stored_messages.clone())
+}
+
+// 🔄 WebSocket for real-time updates
+async fn websocket_handler(
+    ws: WebSocketUpgrade,
+    Extension(tx): Extension<broadcast::Sender<ChatMessage>>,
+    Extension(messages): Extension<SharedMessages>,
 ) -> impl IntoResponse {
-    let mut messages = state.messages.lock().unwrap();
-    messages.push(new_message);
-    (StatusCode::CREATED, Json(messages.clone()))
+    ws.on_upgrade(move |socket| websocket_process(socket, tx, messages))
+}
+
+async fn websocket_process(mut socket: WebSocket, mut tx: broadcast::Sender<ChatMessage>, messages: SharedMessages) {
+    let mut rx = tx.subscribe();
+
+    // Send existing messages to new clients
+    let existing_messages = messages.lock().await.clone();
+    for msg in existing_messages {
+        let _ = socket.send(Message::Text(serde_json::to_string(&msg).unwrap())).await;
+    }
+
+    while let Ok(msg) = rx.recv().await {
+        let _ = socket.send(Message::Text(serde_json::to_string(&msg).unwrap())).await;
+    }
 }

@@ -1,0 +1,10 @@
+/home/ju-nine/projects/personal_projects/mr9-chat-app/backend/target/debug/deps/libtokio_tungstenite-dacae9779f851e39.rmeta: /home/ju-nine/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-tungstenite-0.24.0/src/lib.rs /home/ju-nine/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-tungstenite-0.24.0/src/compat.rs /home/ju-nine/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-tungstenite-0.24.0/src/connect.rs /home/ju-nine/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-tungstenite-0.24.0/src/handshake.rs /home/ju-nine/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-tungstenite-0.24.0/src/stream.rs /home/ju-nine/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-tungstenite-0.24.0/src/tls.rs
+
+/home/ju-nine/projects/personal_projects/mr9-chat-app/backend/target/debug/deps/tokio_tungstenite-dacae9779f851e39.d: /home/ju-nine/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-tungstenite-0.24.0/src/lib.rs /home/ju-nine/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-tungstenite-0.24.0/src/compat.rs /home/ju-nine/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-tungstenite-0.24.0/src/connect.rs /home/ju-nine/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-tungstenite-0.24.0/src/handshake.rs /home/ju-nine/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-tungstenite-0.24.0/src/stream.rs /home/ju-nine/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-tungstenite-0.24.0/src/tls.rs
+
+/home/ju-nine/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-tungstenite-0.24.0/src/lib.rs:
+/home/ju-nine/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-tungstenite-0.24.0/src/compat.rs:
+/home/ju-nine/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-tungstenite-0.24.0/src/connect.rs:
+/home/ju-nine/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-tungstenite-0.24.0/src/handshake.rs:
+/home/ju-nine/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-tungstenite-0.24.0/src/stream.rs:
+/home/ju-nine/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-tungstenite-0.24.0/src/tls.rs:
