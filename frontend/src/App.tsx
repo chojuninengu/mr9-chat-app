@@ -6,6 +6,7 @@ const API_URL = "http://127.0.0.1:3000"; // Your Rust backend
 interface Message {
   username: string;
   content: string;
+  is_ai?: boolean;
 }
 
 function App() {
@@ -36,37 +37,89 @@ function App() {
   const sendMessage = async () => {
     if (!username || !message) return;
 
-    await axios.post(`${API_URL}/send`, { username, content: message });
+    await axios.post(`${API_URL}/send`, { 
+      username, 
+      content: message,
+      is_ai: false
+    });
     setMessage(""); // Clear input after sending
   };
 
   return (
-    <div style={{ maxWidth: "500px", margin: "auto", textAlign: "center" }}>
-      <h1>Mr-9 Chat App</h1>
-      <input
-        type="text"
-        placeholder="Username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        style={{ width: "100%", marginBottom: "8px", padding: "8px" }}
-      />
-      <input
-        type="text"
-        placeholder="Type a message..."
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        style={{ width: "100%", marginBottom: "8px", padding: "8px" }}
-      />
-      <button onClick={sendMessage} style={{ padding: "8px 16px" }}>
-        Send
-      </button>
-      <ul style={{ listStyle: "none", padding: "0", marginTop: "16px" }}>
+    <div style={{ maxWidth: "800px", margin: "auto", padding: "20px" }}>
+      <h1 style={{ textAlign: "center", marginBottom: "30px" }}>Mr-9 Chat App with Claude AI</h1>
+      <div style={{ marginBottom: "20px" }}>
+        <input
+          type="text"
+          placeholder="Your Name"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          style={{ 
+            width: "100%", 
+            padding: "10px",
+            marginBottom: "10px",
+            borderRadius: "5px",
+            border: "1px solid #ccc"
+          }}
+        />
+        <div style={{ display: "flex", gap: "10px" }}>
+          <input
+            type="text"
+            placeholder="Type a message..."
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+            style={{ 
+              flex: 1,
+              padding: "10px",
+              borderRadius: "5px",
+              border: "1px solid #ccc"
+            }}
+          />
+          <button 
+            onClick={sendMessage}
+            style={{
+              padding: "10px 20px",
+              borderRadius: "5px",
+              border: "none",
+              backgroundColor: "#0066cc",
+              color: "white",
+              cursor: "pointer"
+            }}
+          >
+            Send
+          </button>
+        </div>
+      </div>
+      <div style={{ 
+        border: "1px solid #ccc",
+        borderRadius: "5px",
+        height: "500px",
+        overflowY: "auto",
+        padding: "20px"
+      }}>
         {messages.map((msg, index) => (
-          <li key={index} style={{ padding: "8px", borderBottom: "1px solid #ccc" }}>
-            <strong>{msg.username}:</strong> {msg.content}
-          </li>
+          <div 
+            key={index} 
+            style={{ 
+              marginBottom: "15px",
+              padding: "10px",
+              borderRadius: "5px",
+              backgroundColor: msg.is_ai ? "#f0f7ff" : "#ffffff",
+              border: "1px solid #e0e0e0"
+            }}
+          >
+            <div style={{ 
+              fontWeight: "bold", 
+              color: msg.is_ai ? "#0066cc" : "#333",
+              marginBottom: "5px"
+            }}>
+              {msg.username}
+            </div>
+            <div style={{ whiteSpace: "pre-wrap" }}>{msg.content}</div>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }
